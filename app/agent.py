@@ -372,11 +372,33 @@ def update_discount_status(
 # Ensure os is imported if not already, but we assume it's imported at the top.
 # os.environ["GOOGLE_API_KEY"] is already populated by the environment.
 
+from functools import cached_property
+from google.adk.models import Gemini
+from google.genai import Client
+import os
+
+class CustomGemini(Gemini):
+    @cached_property
+    def api_client(self) -> Client:
+        from google.genai import types
+        api_key = os.environ.get("GOOGLE_API_KEY")
+        return Client(api_key=api_key, vertexai=False)
+
+    @cached_property
+    def _live_api_client(self) -> Client:
+        from google.genai import types
+        api_key = os.environ.get("GOOGLE_API_KEY")
+        kwargs = {
+            'http_options': types.HttpOptions(
+                headers=self._tracking_headers(),
+                api_version=self._live_api_version,
+            )
+        }
+        return Client(api_key=api_key, vertexai=False, **kwargs)
+
 root_agent = Agent(
     name="shopping_assistant",
-    model=Gemini(
-        model="gemini-flash-latest",
-    ),
+    model=CustomGemini(model="gemini-3-flash-preview"),
     instruction=(
         "You are a friendly and knowledgeable AI shopping assistant for a retail store. "
         "Help customers discover products, answer questions about items in the catalogue, "
