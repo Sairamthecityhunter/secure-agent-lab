@@ -1,0 +1,41 @@
+# .pre-commit-config.yaml
+# Pre-commit hook configuration for shopping-assistant.
+# Runs on every `git commit` to enforce code hygiene and security standards.
+# Install hooks with: pre-commit install
+# Run manually on all files with: pre-commit run --all-files
+
+repos:
+  # ---------------------------------------------------------------------------
+  # Standard file hygiene hooks (from pre-commit-hooks)
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+        name: Fix end-of-file newlines
+        description: Ensures every file ends with exactly one newline character.
+
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+        description: Strips trailing whitespace from all lines.
+        args: [--markdown-linebreak-ext=md]
+
+  # ---------------------------------------------------------------------------
+  # Semgrep security scan (local — uses our custom rules, no network lookup)
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: semgrep-security-scan
+        name: Semgrep — hardcoded secrets & security scan
+        description: >
+          Runs our custom Semgrep ruleset against Python source files.
+          Blocks commit if any ERROR-severity finding is detected (e.g. hardcoded
+          API keys). Treat any finding as a refactoring task per CONTEXT.md.
+        language: system
+        entry: .venv/bin/semgrep
+        args:
+          - --config=.semgrep/rules.yaml
+          - --error          # exit non-zero on any finding → blocks the commit
+          - --quiet          # suppress progress output; show findings only
+        types: [python]
+        pass_filenames: false  # scan the whole project, not just staged files
