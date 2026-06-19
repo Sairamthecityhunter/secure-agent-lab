@@ -87,7 +87,7 @@ def test_invalid_code_handling():
 
 def test_inactive_code_protection():
     response_admin, sid = run_agent("I am admin_001. Deactivate the code WELCOME50.")
-    # The agent might just succeed with an empty text if the tool returns success, let's just make sure it didn't fail
+    assert "success" in response_admin.lower() or "updated" in response_admin.lower() or "deactivated" in response_admin.lower()
 
     response_user, _ = run_agent("I am user_001. Redeem WELCOME50.", session_id=sid)
     assert "inactive" in response_user.lower() or "deactivated" in response_user.lower()
