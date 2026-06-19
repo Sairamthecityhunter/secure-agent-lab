@@ -398,7 +398,7 @@ class CustomGemini(Gemini):
 
 root_agent = Agent(
     name="shopping_assistant",
-    model=CustomGemini(model="gemini-2.5-flash-lite"),
+    model=CustomGemini(model="gemini-flash-lite-latest"),
     instruction=(
         "You are a friendly and knowledgeable AI shopping assistant for a retail store. "
         "Help customers discover products, answer questions about items in the catalogue, "
